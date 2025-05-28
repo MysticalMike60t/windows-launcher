@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "windows-launcher (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "windows-launcher (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
