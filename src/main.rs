@@ -23,7 +23,9 @@ struct AppData {
 #[derive(Default)]
 pub struct LauncherUi {
     window: nwg::Window,
-    category_list: nwg::ComboBox<String>,
+    category_label: nwg::Label,
+    category_list: nwg::ListBox<String>,
+    app_label: nwg::Label,
     app_list: nwg::ListBox<String>,
     launch_btn: nwg::Button,
     data: Rc<RefCell<Option<AppData>>>,
@@ -47,12 +49,15 @@ mod events {
     use super::*;
     use nwg::Event as E;
 
-    pub fn handle(ui: &LauncherUi, evt: nwg::Event) {
+    pub fn handle(ui: &LauncherUi, evt: nwg::Event, handle: &nwg::ControlHandle) {
         match evt {
-            E::OnComboxBoxSelection => {
-                ui.update_apps();
+            E::OnListBoxSelect => {
+                // Only update apps if the category list triggered the event
+                if *handle == ui.category_list.handle {
+                    ui.update_apps();
+                }
             }
-            E::OnButtonClick => {
+            E::OnButtonClick | E::OnListBoxDoubleClick => {
                 let cat_idx = ui.category_list.selection();
                 let app_idx = ui.app_list.selection();
                 if let (Some(data), Some(cat_idx), Some(app_idx)) =
@@ -77,31 +82,47 @@ fn main() {
     let mut ui = LauncherUi::default();
 
     nwg::Window::builder()
-        .size((400, 300))
+        .size((500, 350))
         .position((300, 300))
         .title("Rust Windows Launcher")
         .build(&mut ui.window)
         .unwrap();
 
-    nwg::ComboBox::builder()
+    nwg::Label::builder()
+        .text("Categories")
         .parent(&ui.window)
-        .position((10, 10))
-        .size((360, 30))
-        .build(&mut ui.category_list)
+        .position((20, 10))
+        .size((120, 20))
+        .build(&mut ui.category_label)
         .unwrap();
 
     nwg::ListBox::builder()
         .parent(&ui.window)
-        .position((10, 50))
-        .size((360, 170))
+        .position((20, 35))
+        .size((180, 220))
+        .build(&mut ui.category_list)
+        .unwrap();
+
+    nwg::Label::builder()
+        .text("Applications")
+        .parent(&ui.window)
+        .position((220, 10))
+        .size((200, 20))
+        .build(&mut ui.app_label)
+        .unwrap();
+
+    nwg::ListBox::builder()
+        .parent(&ui.window)
+        .position((220, 35))
+        .size((250, 220))
         .build(&mut ui.app_list)
         .unwrap();
 
     nwg::Button::builder()
         .text("Launch")
         .parent(&ui.window)
-        .position((10, 230))
-        .size((360, 40))
+        .position((20, 270))
+        .size((450, 40))
         .build(&mut ui.launch_btn)
         .unwrap();
 
@@ -123,8 +144,8 @@ fn main() {
     let ui_events = ui_rc.clone();
     nwg::bind_event_handler(&ui_events.window.handle, &ui_events.window.handle, {
         let ui_events = ui_events.clone();
-        move |evt, _evt_data, _handle| {
-            events::handle(&ui_events, evt);
+        move |evt, _evt_data, handle| {
+            events::handle(&ui_events, evt, &handle);
         }
     });
 
