@@ -5,7 +5,7 @@
     xmlns:local="using:windows_launcher"
     Title="Launcher">
 
-    <Grid x:Name="RootGrid" Background="Black">
+    <Grid x:Name="RootGrid" Background="Transparent">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280"/>
             <ColumnDefinition Width="*"/>

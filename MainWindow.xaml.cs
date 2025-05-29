@@ -12,6 +12,12 @@ using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using Windows.UI;
 
+// Add these for Mica
+using Microsoft.UI.Composition.SystemBackdrops;
+using WinRT.Interop;
+using Microsoft.UI.Composition;
+using System.Runtime.InteropServices;
+
 namespace windows_launcher
 {
     public sealed partial class MainWindow : Window
@@ -20,6 +26,11 @@ namespace windows_launcher
         private ObservableCollection<Category> filteredCategories = new();
         private ObservableCollection<AppItem> matchingApps = new();
         private string defaultIcon;
+
+        // Mica fields
+        private WindowsSystemDispatcherQueueHelper _wsdqHelper;
+        private MicaController? _micaController;
+        private SystemBackdropConfiguration? _backdropConfiguration;
 
         public MainWindow()
         {
@@ -59,6 +70,9 @@ namespace windows_launcher
             // Set your custom draggable region from XAML for the window titlebar
             this.SetTitleBar(CustomDragRegion);
 
+            // --- Mica background setup ---
+            TrySetMicaBackdrop();
+
             defaultIcon = Path.Combine(AppContext.BaseDirectory, "icons", "default.ico");
             LoadData();
 
@@ -68,6 +82,23 @@ namespace windows_launcher
             CategoryList.SelectionChanged += CategoryList_SelectionChanged;
             SearchBox.TextChanged += SearchBox_TextChanged;
             AppList.DoubleTapped += AppList_DoubleTapped;
+        }
+
+        // Mica setup
+        private void TrySetMicaBackdrop()
+        {
+            _wsdqHelper = new WindowsSystemDispatcherQueueHelper();
+            _wsdqHelper.EnsureWindowsSystemDispatcherQueueController();
+
+            _backdropConfiguration = new SystemBackdropConfiguration();
+            _backdropConfiguration.IsInputActive = true;
+            _backdropConfiguration.Theme = SystemBackdropTheme.Default;
+
+            _micaController = new MicaController();
+
+            // Use the WinUI 3 window as the backdrop target
+            _micaController.AddSystemBackdropTarget((ICompositionSupportsSystemBackdrop)(object)this);
+            _micaController.SetSystemBackdropConfiguration(_backdropConfiguration);
         }
 
         private void LoadData()
@@ -185,6 +216,38 @@ namespace windows_launcher
                 }
             }
         }
+    }
+
+    // Helper for Mica
+    public class WindowsSystemDispatcherQueueHelper
+    {
+        private object? _dispatcherQueueController;
+
+        public void EnsureWindowsSystemDispatcherQueueController()
+        {
+            if (Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread() != null)
+                return;
+
+            var options = new DispatcherQueueOptions
+            {
+                dwSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(DispatcherQueueOptions)),
+                threadType = 2,    // DQTYPE_THREAD_CURRENT
+                apartmentType = 2  // DQTAT_COM_STA
+            };
+
+            CreateDispatcherQueueController(options, out _dispatcherQueueController);
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        struct DispatcherQueueOptions
+        {
+            public uint dwSize;
+            public int threadType;
+            public int apartmentType;
+        }
+
+        [System.Runtime.InteropServices.DllImport("CoreMessaging.dll")]
+        private static extern int CreateDispatcherQueueController(DispatcherQueueOptions options, out object dispatcherQueueController);
     }
 
     public class LauncherData
