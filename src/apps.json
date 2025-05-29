@@ -1,0 +1,34 @@
+{
+  "categories": [
+    {
+      "name": "Utilities",
+      "icon": "..\\icons\\default\\general\\utilities.ico",
+      "apps": [
+        {
+          "name": "Notepad",
+          "exec": "C:\\Windows\\notepad.exe",
+          "icon": "..\\icons\\default\\general\\notepad.ico",
+          "description": "Simple text editor"
+        },
+        {
+          "name": "Calculator",
+          "exec": "C:\\Windows\\System32\\calc.exe",
+          "icon": "..\\icons\\default\\general\\calculator.ico",
+          "description": "Performs basic calculations"
+        }
+      ]
+    },
+    {
+      "name": "Terminal",
+      "icon": "..\\icons\\default\\general\\terminal.ico",
+      "apps": [
+        {
+          "name": "Windows Terminal",
+          "exec": "C:\\Users\\Caden\\AppData\\Local\\Microsoft\\WindowsApps\\wt.exe",
+          "icon": "..\\icons\\default\\programs\\windows-terminal.ico",
+          "description": "Modern terminal for Windows"
+        }
+      ]
+    }
+  ]
+}
