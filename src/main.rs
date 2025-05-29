@@ -117,7 +117,7 @@ fn main() {
     nwg::Window::builder()
         .size((700, 450))
         .position((300, 200))
-        .title("Rust Windows Launcher")
+        .title("Windows Launcher")
         .build(&mut ui.window)
         .unwrap();
 
