@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Windows.System;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
+using Windows.UI;
 
 namespace windows_launcher
 {
@@ -27,10 +28,12 @@ namespace windows_launcher
             // Set dark theme
             RootGrid.RequestedTheme = ElementTheme.Dark;
 
-            // Set window size and center
+            // Enable extending content into the title bar for custom drag region and background effect
             var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
             var appWindow = AppWindow.GetFromWindowId(windowId);
+
+            // Set size and position as you already do
             appWindow.Resize(new SizeInt32(900, 600));
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
             appWindow.Move(new PointInt32(
@@ -38,15 +41,23 @@ namespace windows_launcher
                 (displayArea.WorkArea.Height - 600) / 2
             ));
 
-            // Style the title bar for Windows 11 look
+            // Style the title bar for Windows 11 look with transparent background
             var titleBar = appWindow.TitleBar;
-            titleBar.ExtendsContentIntoTitleBar = false;
-            titleBar.ButtonBackgroundColor = Windows.UI.Color.FromArgb(255, 32, 32, 32);
-            titleBar.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(255, 32, 32, 32);
-            titleBar.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 255, 255, 255);
-            titleBar.BackgroundColor = Windows.UI.Color.FromArgb(255, 32, 32, 32);
-            titleBar.InactiveBackgroundColor = Windows.UI.Color.FromArgb(255, 32, 32, 32);
-            titleBar.ForegroundColor = Windows.UI.Color.FromArgb(255, 255, 255, 255);
+            titleBar.ExtendsContentIntoTitleBar = true;
+
+            var transparent = Color.FromArgb(0, 0, 0, 0);
+            var white = Color.FromArgb(255, 255, 255, 255);
+            var gray = Color.FromArgb(255, 128, 128, 128);
+
+            titleBar.ButtonBackgroundColor = transparent;
+            titleBar.ButtonInactiveBackgroundColor = transparent;
+            titleBar.BackgroundColor = transparent;
+            titleBar.InactiveBackgroundColor = transparent;
+            titleBar.ButtonForegroundColor = white;
+            titleBar.ButtonInactiveForegroundColor = gray;
+
+            // Set your custom draggable region from XAML for the window titlebar
+            this.SetTitleBar(CustomDragRegion);
 
             defaultIcon = Path.Combine(AppContext.BaseDirectory, "icons", "default.ico");
             LoadData();
