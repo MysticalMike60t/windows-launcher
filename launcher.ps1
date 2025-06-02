@@ -79,7 +79,20 @@ $searchBox.Add_TextChanged({
 $appList.Add_MouseDoubleClick({
     $selectedApp = $appList.SelectedItem
     if ($null -ne $selectedApp) {
-      Start-Process powershell -ArgumentList "-NoProfile", "-Command", $selectedApp.command
+      $cmd = $selectedApp.command
+      if (-not $cmd -and $selectedApp.path) {
+        $cmd = $selectedApp.path
+      }
+      if ($cmd) {
+        # Resolve relative path to absolute
+        $exePath = Resolve-Path -LiteralPath $cmd -ErrorAction SilentlyContinue
+        if ($exePath) {
+          Start-Process -FilePath $exePath.ProviderPath
+        } else {
+          # If not found, try as-is (may be in PATH)
+          Start-Process -FilePath $cmd
+        }
+      }
     }
   })
 
