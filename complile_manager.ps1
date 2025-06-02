@@ -1,1 +1,1 @@
-pyinstaller launcher.spec
+pyinstaller manager.spec
